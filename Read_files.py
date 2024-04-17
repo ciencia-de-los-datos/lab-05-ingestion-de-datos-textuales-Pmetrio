@@ -1,25 +1,26 @@
 import os
 import pandas as pd
 
-def process_directory(directory):
+# Función para leer los archivos y crear un DataFrame
+def create_dataset(directory):
     data = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".txt"):
-                with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
-                    text = f.read()
-                    sentiment = os.path.basename(root)
-                    data.append({'phrase': text, 'target': sentiment})
-    return data
+    for sentiment in os.listdir(directory):
+        sentiment_path = os.path.join(directory, sentiment)
+        if os.path.isdir(sentiment_path):
+            for filename in os.listdir(sentiment_path):
+                file_path = os.path.join(sentiment_path, filename)
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+                    try:
+                        phrase = file.read().strip()
+                        data.append({'phrase': phrase, 'sentiment': sentiment})
+                    except Exception as e:
+                        print(f"Error reading file '{file_path}': {e}")
+    return pd.DataFrame(data)
 
-# Procesar directorios de entrenamiento y prueba
-train_data = process_directory('train')
-test_data = process_directory('test')
+# Crear los DataFrames para el conjunto de entrenamiento y prueba
+train_df = create_dataset('data/train')
+test_df = create_dataset('data/test')
 
-# Convertir a DataFrames
-train_df = pd.DataFrame(train_data)
-test_df = pd.DataFrame(test_data)
-
-# Guardar como archivos CSV
+# Guardar los DataFrames como archivos CSV
 train_df.to_csv('train_dataset.csv', index=False)
 test_df.to_csv('test_dataset.csv', index=False)
