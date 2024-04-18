@@ -18,6 +18,10 @@ test_data = process_directory('test')
 train_df = pd.DataFrame(train_data)
 test_df = pd.DataFrame(test_data)
 
+# Renombrar la columna 'sentiment' a 'target'
+train_df.rename(columns={'sentiment': 'target'}, inplace=True)
+test_df.rename(columns={'sentiment': 'target'}, inplace=True)
+
 # Guardar como archivos CSV
 train_df.to_csv('train_dataset.csv', index=False)
 test_df.to_csv('test_dataset.csv', index=False)
