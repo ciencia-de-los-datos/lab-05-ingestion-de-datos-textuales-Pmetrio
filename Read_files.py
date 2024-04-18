@@ -1,35 +1,29 @@
 import glob
 import pandas as pd
 
-def archivo_test():
-    folder_list = ["negative","neutral","positive"]
-    columna1=[]
-    columna2=[]
-    for folder in folder_list:
-        filenames=glob.glob(f"data/test/{folder}"+"/*")
-        for filename in filenames:
-            columna1.append(pd.read_csv(filename, sep="\t",header=None, names=["phrase"]))
-            columna2.append(folder)
-    concatenated_col1 = pd.concat(columna1, ignore_index = True, axis=0)
-    concatenated_col2=pd.DataFrame(columna2,columns=["sentiment"])
-    df = pd.concat(objs=[concatenated_col1, concatenated_col2], axis=1, join="outer", ignore_index=False, sort=False)
-    df.to_csv("test_dataset.csv", sep=",", index=False, header=True)
-    return df
+def process_files_in_folder(folder_path):
+    data = []
+    filenames = glob.glob(folder_path + "/*.txt")
+    for filename in filenames:
+        with open(filename, 'r', encoding='utf-8') as file:
+            text = file.read()
+            sentiment = folder_path.split('/')[-1]
+            data.append({'phrase': text, 'sentiment': sentiment})
+    return data
 
-def archivo_train():
-    folder_list = ["negative","neutral","positive"]
-    columna1=[]
-    columna2=[]
+def create_dataset(folder_root, output_filename):
+    folder_list = ["negative", "neutral", "positive"]
+    all_data = []
     for folder in folder_list:
-        filenames=glob.glob(f"data/train/{folder}"+"/*")
-        for filename in filenames:
-            columna1.append(pd.read_csv(filename, sep="\t",header=None, names=["phrase"]))
-            columna2.append(folder)
-    concatenated_col1 = pd.concat(columna1, ignore_index = True, axis=0)
-    concatenated_col2=pd.DataFrame(columna2,columns=["sentiment"])
-    df = pd.concat(objs=[concatenated_col1, concatenated_col2], axis=1, join="outer", ignore_index=False, sort=False)
-    df.to_csv("train_dataset.csv", sep=",", index=False, header=True)
-    return df
+        folder_path = f"{folder_root}/{folder}"
+        folder_data = process_files_in_folder(folder_path)
+        all_data.extend(folder_data)
+    
+    df = pd.DataFrame(all_data)
+    df.to_csv(output_filename, index=False)
 
-archivo_test()
-archivo_train()
+def generate_train_and_test_datasets():
+    create_dataset("data/train", "train_dataset.csv")
+    create_dataset("data/test", "test_dataset.csv")
+
+generate_train_and_test_datasets()
