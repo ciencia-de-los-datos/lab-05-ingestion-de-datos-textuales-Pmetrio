@@ -1,27 +1,35 @@
 import glob
 import pandas as pd
 
-def process_directory(directory):
-    data = []
-    for file_path in glob.glob(directory + '/**/*.txt', recursive=True):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            text = f.read()
-            sentiment = file_path.split('/')[-2]
-            data.append({'phrase': text, 'sentiment': sentiment})
-    return data
+def archivo_test():
+    folder_list = ["negative","neutral","positive"]
+    columna1=[]
+    columna2=[]
+    for folder in folder_list:
+        filenames=glob.glob(f"data/test/{folder}"+"/*")
+        for filename in filenames:
+            columna1.append(pd.read_csv(filename, sep="\t",header=None, names=["phrase"]))
+            columna2.append(folder)
+    concatenated_col1 = pd.concat(columna1, ignore_index = True, axis=0)
+    concatenated_col2=pd.DataFrame(columna2,columns=["sentiment"])
+    df = pd.concat(objs=[concatenated_col1, concatenated_col2], axis=1, join="outer", ignore_index=False, sort=False)
+    df.to_csv("test_dataset.csv", sep=",", index=False, header=True)
+    return df
 
-# Procesar directorios de entrenamiento y prueba
-train_data = process_directory('train')
-test_data = process_directory('test')
+def archivo_train():
+    folder_list = ["negative","neutral","positive"]
+    columna1=[]
+    columna2=[]
+    for folder in folder_list:
+        filenames=glob.glob(f"data/train/{folder}"+"/*")
+        for filename in filenames:
+            columna1.append(pd.read_csv(filename, sep="\t",header=None, names=["phrase"]))
+            columna2.append(folder)
+    concatenated_col1 = pd.concat(columna1, ignore_index = True, axis=0)
+    concatenated_col2=pd.DataFrame(columna2,columns=["sentiment"])
+    df = pd.concat(objs=[concatenated_col1, concatenated_col2], axis=1, join="outer", ignore_index=False, sort=False)
+    df.to_csv("train_dataset.csv", sep=",", index=False, header=True)
+    return df
 
-# Convertir a DataFrames
-train_df = pd.DataFrame(train_data)
-test_df = pd.DataFrame(test_data)
-
-# Renombrar la columna 'sentiment' a 'target'
-train_df.rename(columns={'sentiment': 'target'}, inplace=True)
-test_df.rename(columns={'sentiment': 'target'}, inplace=True)
-
-# Guardar como archivos CSV
-train_df.to_csv('train_dataset.csv', index=False)
-test_df.to_csv('test_dataset.csv', index=False)
+archivo_test()
+archivo_train()
