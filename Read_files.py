@@ -1,13 +1,12 @@
-import os
 import glob
 import pandas as pd
 
 def process_directory(directory):
     data = []
-    for file_path in glob.glob(os.path.join(directory, '**/*.txt'), recursive=True):
+    for file_path in glob.glob(directory + '/**/*.txt', recursive=True):
         with open(file_path, 'r', encoding='utf-8') as f:
             text = f.read()
-            sentiment = os.path.basename(os.path.dirname(file_path))
+            sentiment = file_path.split('/')[-2]
             data.append({'phrase': text, 'sentiment': sentiment})
     return data
 
